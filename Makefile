@@ -26,8 +26,10 @@ requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
 
 ## Make Dataset
-data: requirements
-	$(PYTHON_INTERPRETER) src/data/make_dataset.py
+data:
+	$(PYTHON_INTERPRETER) src/data/make_dataset.py > data/interim/march_hourly_bike_rent.csv
+	echo Number of observations: `cat data/interim/march_hourly_bike_rent.csv|wc -l`
+	$(PYTHON_INTERPRETER) src/features/build_features.py
 
 ## Delete all compiled Python files
 clean:
