@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
-import click
-import logging
+import pandas as pd
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+import os
+from datetime import datetime
+import sys
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
+def main():
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    df = pd.read_csv(os.path.join(project_dir, 'data/raw/bike_sharing_demand.csv'),
+        parse_dates=['datetime'])
+# adding date column with just the date
+    df['date'] = df['datetime'].apply(lambda x: pd.to_datetime(datetime.date(x)))
+# filter only data from march
+    df_march = df[df['date'].isin(pd.date_range(start='2012-03-01', end='2012-03-31'))]
+    df_march.drop('date', axis=1, inplace=True)
+# write file to standard output
+    df_march.to_csv(sys.stdout, sep='\t', index=False)
 
 
 if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
-
     # not used in this stub but often useful for finding various files
     project_dir = Path(__file__).resolve().parents[2]
 
     # find .env automagically by walking up directories until it's found, then
     # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
 
     main()
